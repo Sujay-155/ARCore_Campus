@@ -1,4 +1,4 @@
-# Start from the standard, non-slim Python 3.10 image
+# Force a cache bust: 2025-08-15 21:16
 FROM python:3.10
 
 # Set environment variables for specific, compatible versions
@@ -30,4 +30,5 @@ COPY . .
 
 # Command to run the application
 CMD ["gunicorn", "--bind", "0.0.0.0:$PORT", "--timeout", "600", "app:app"]
+
 
