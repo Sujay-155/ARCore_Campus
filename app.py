@@ -6,7 +6,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 import time
 import traceback
 
@@ -24,7 +23,7 @@ def scrape_christ_events():
     chrome_options.add_argument("--disable-dev-shm-usage")
     
     # webdriver-manager will automatically download the correct driver for the Chrome version installed by startup.sh
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
     
     try:
         url = "https://christuniversity.in/events"
@@ -125,4 +124,5 @@ def health_check():
 
 # This block is used for local testing. On Azure, Gunicorn will run the 'app' object directly.
 if __name__ == '__main__':
+
     app.run(debug=True, host='0.0.0.0', port=5000)
