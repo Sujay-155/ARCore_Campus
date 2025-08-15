@@ -6,8 +6,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 import traceback
+import os
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -21,9 +23,24 @@ def scrape_christ_events():
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-logging")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--remote-debugging-port=9222")
+    chrome_options.add_argument("--window-size=1920,1080")
     
-    # webdriver-manager will automatically download the correct driver for the Chrome version installed by startup.sh
-    driver = webdriver.Chrome(options=chrome_options)
+    try:
+        # Use ChromeDriverManager to automatically handle driver installation
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+    except Exception as e:
+        print(f"Failed to create Chrome driver with ChromeDriverManager: {e}")
+        # Fallback: try to use system chromedriver if available
+        try:
+            driver = webdriver.Chrome(options=chrome_options)
+        except Exception as e2:
+            print(f"Failed to create Chrome driver without service: {e2}")
+            raise e2
     
     try:
         url = "https://christuniversity.in/events"
@@ -124,5 +141,4 @@ def health_check():
 
 # This block is used for local testing. On Azure, Gunicorn will run the 'app' object directly.
 if __name__ == '__main__':
-
     app.run(debug=True, host='0.0.0.0', port=5000)
