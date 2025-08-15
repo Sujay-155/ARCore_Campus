@@ -6,10 +6,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 import time
 import traceback
-import os
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -25,22 +23,12 @@ def scrape_christ_events():
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-logging")
-    chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--remote-debugging-port=9222")
     chrome_options.add_argument("--window-size=1920,1080")
     
-    try:
-        # Use ChromeDriverManager to automatically handle driver installation
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-    except Exception as e:
-        print(f"Failed to create Chrome driver with ChromeDriverManager: {e}")
-        # Fallback: try to use system chromedriver if available
-        try:
-            driver = webdriver.Chrome(options=chrome_options)
-        except Exception as e2:
-            print(f"Failed to create Chrome driver without service: {e2}")
-            raise e2
+    # Use the ChromeDriver installed in the Docker container
+    service = Service("/usr/local/bin/chromedriver")
+    driver = webdriver.Chrome(service=service, options=chrome_options)
     
     try:
         url = "https://christuniversity.in/events"
