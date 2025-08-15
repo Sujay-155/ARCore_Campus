@@ -6,8 +6,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 import traceback
+import os
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -25,10 +27,30 @@ def scrape_christ_events():
     chrome_options.add_argument("--disable-logging")
     chrome_options.add_argument("--remote-debugging-port=9222")
     chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--disable-web-security")
+    chrome_options.add_argument("--allow-running-insecure-content")
+    chrome_options.add_argument("--disable-background-timer-throttling")
+    chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+    chrome_options.add_argument("--disable-renderer-backgrounding")
+    chrome_options.add_argument("--disable-features=TranslateUI")
+    chrome_options.add_argument("--disable-ipc-flooding-protection")
     
-    # Use the ChromeDriver installed in the Docker container
-    service = Service("/usr/local/bin/chromedriver")
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    try:
+        # Use ChromeDriverManager to automatically handle driver installation
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        print("Chrome driver created successfully")
+        return driver
+    except Exception as e:
+        print(f"ChromeDriverManager failed: {e}")
+        # Fallback: try without service (let Selenium find driver automatically)
+        try:
+            driver = webdriver.Chrome(options=chrome_options)
+            print("Chrome driver created without explicit service")
+            return driver
+        except Exception as e2:
+            print(f"Chrome driver creation failed completely: {e2}")
+            raise Exception(f"Could not create Chrome driver. ChromeDriverManager error: {e}. Direct Chrome error: {e2}")
     
     try:
         url = "https://christuniversity.in/events"
